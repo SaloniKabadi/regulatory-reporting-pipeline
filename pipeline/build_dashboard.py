@@ -55,7 +55,7 @@ def _kpi_card(label: str, value: str, sublabel: str = "") -> str:
     """
 
 
-def _chart_default_by_loan_type(risk: pd.DataFrame) -> str:
+def _chart_default_by_loan_type(risk: pd.DataFrame, include_js: bool = False) -> str:
     fig = go.Figure(
         go.Bar(
             x=risk["loan_type"],
@@ -74,7 +74,11 @@ def _chart_default_by_loan_type(risk: pd.DataFrame) -> str:
         height=380,
         margin=dict(l=40, r=20, t=60, b=40),
     )
-    return fig.to_html(full_html=False, include_plotlyjs=False, div_id="chart_default_by_type")
+    return fig.to_html(
+        full_html=False,
+        include_plotlyjs=("inline" if include_js else False),
+        div_id="chart_default_by_type",
+    )
 
 
 def _chart_exposure_donut(seg: pd.DataFrame) -> str:
@@ -180,11 +184,10 @@ def build():
         + _kpi_card("Avg default rate", f"{avg_default_rate:.2f}%", "across loan types")
     )
 
-    chart_default = _chart_default_by_loan_type(risk)
+    chart_default = _chart_default_by_loan_type(risk, include_js=True)
     chart_donut = _chart_exposure_donut(seg)
     chart_band = _chart_default_by_band(seg)
     chart_scatter = _chart_loan_vs_default(seg)
-
     # Tables — render the raw data so the dashboard tells the same story as Excel
     risk_table = risk.to_html(index=False, classes="data-table", border=0, float_format="%.2f")
     seg_table = seg.to_html(index=False, classes="data-table", border=0, float_format="%.2f")
@@ -197,7 +200,6 @@ def build():
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Regulatory Reporting Dashboard</title>
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <style>
   :root {{
     --navy: {NAVY};
