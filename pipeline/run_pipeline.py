@@ -1,7 +1,7 @@
-"""run_pipeline.py - Main orchestrator.
+"""Main pipeline. Ingest -> SQL -> Excel.
 
-Calls ingest -> runs SQL reports -> exports formatted multi-sheet Excel.
-Same pattern banks use for month-end regulatory reporting.
+Run this once to produce the monthly report. The scheduler calls
+`main()` on its cron trigger.
 """
 
 import logging
@@ -13,7 +13,7 @@ from datetime import datetime
 import pandas as pd
 from sqlalchemy import text
 
-# Allow imports from the pipeline/ folder when run from repo root or from inside it.
+# Lets us run from repo root or from inside pipeline/.
 sys.path.append(os.path.dirname(__file__))
 from ingest import ingest_data  # noqa: E402
 
@@ -23,7 +23,8 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-# Paths are relative to repo root.
+# All paths are anchored to the repo root so the script works
+# whether you run it from inside pipeline/ or from the top level.
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SQL_DIR = os.path.join(REPO_ROOT, "sql")
 OUTPUT_DIR = os.path.join(REPO_ROOT, "output")
@@ -31,7 +32,7 @@ DATA_CSV = os.path.join(REPO_ROOT, "data", "LoanStats_2018Q4.csv")
 
 
 def run_sql_file(engine, sql_path: str) -> pd.DataFrame:
-    """Read a .sql file and execute it, returning a DataFrame."""
+    """Execute a .sql file and return the result as a DataFrame."""
     with open(sql_path, "r") as f:
         query = f.read()
     with engine.connect() as conn:
@@ -39,12 +40,13 @@ def run_sql_file(engine, sql_path: str) -> pd.DataFrame:
 
 
 def export_to_excel(dfs: dict, output_path: str) -> None:
-    """Write multiple DataFrames to a formatted Excel - each as a separate sheet."""
+    """Write the DataFrames out as a multi-sheet xlsx with some basic styling."""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     with pd.ExcelWriter(output_path, engine="xlsxwriter") as writer:
         wb = writer.book
 
+        # Navy header. Looks more professional than xlsxwriter's default.
         hdr = wb.add_format(
             {
                 "bold": True,
@@ -63,15 +65,14 @@ def export_to_excel(dfs: dict, output_path: str) -> None:
 
             for col_idx, col_name in enumerate(df.columns):
                 ws.write(0, col_idx, col_name, hdr)
-                # Auto-width based on header length, with a sensible minimum
+                # Width based on header length, with a min of 18.
                 width = max(len(str(col_name)) + 4, 18)
-                # Apply number format to numeric columns only
                 if pd.api.types.is_numeric_dtype(df[col_name]):
                     ws.set_column(col_idx, col_idx, width, num_fmt)
                 else:
                     ws.set_column(col_idx, col_idx, width)
 
-            ws.freeze_panes(1, 0)  # Lock the header row when scrolling
+            ws.freeze_panes(1, 0)  # keep the header row visible while scrolling
 
     log.info(f"Report saved: {output_path}")
 
@@ -79,16 +80,16 @@ def export_to_excel(dfs: dict, output_path: str) -> None:
 def main():
     log.info("======= PIPELINE START =======")
 
-    # 1. Ingest
+    # 1. Pull data into SQLite.
     engine = ingest_data(csv_path=DATA_CSV)
 
-    # Total rows for the metadata sheet
+    # Row count for the metadata sheet.
     with engine.connect() as conn:
         total_rows = conn.execute(
             text("SELECT COUNT(*) FROM loan_applications")
         ).scalar()
 
-    # 2. Run SQL reports
+    # 2. Run each SQL file. Each one becomes its own Excel sheet.
     reports = {
         "Risk_Summary": run_sql_file(engine, os.path.join(SQL_DIR, "risk_summary.sql")),
         "Risk_Segments": run_sql_file(
@@ -108,8 +109,8 @@ def main():
         ),
     }
 
-    # 3. Export — write a timestamped copy for archival, plus a stable
-    # `_latest.xlsx` so Power BI / dashboards can point at one fixed path.
+    # 3. Write two copies. The timestamped one is the archive,
+    # _latest is what the dashboard / BI tools point at.
     fname = os.path.join(
         OUTPUT_DIR, f"monthly_report_{datetime.now():%Y%m}.xlsx"
     )

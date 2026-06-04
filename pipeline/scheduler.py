@@ -1,7 +1,9 @@
-"""scheduler.py - Run the regulatory pipeline on a schedule.
+"""Cron-style scheduler around the pipeline.
 
-Production: 1st of every month at 06:00.
-For demo screenshots: temporarily change to CronTrigger(minute='*/2').
+Production schedule is the 1st of every month at 06:00. For local
+testing / screenshots, temporarily switch to CronTrigger(minute="*/2")
+so it fires every two minutes. Don't forget to switch back before
+pushing.
 """
 
 import logging
@@ -21,22 +23,20 @@ logging.basicConfig(
 
 scheduler = BlockingScheduler()
 
-# Production schedule: 1st of every month at 06:00.
-# For demo: swap to CronTrigger(minute="*/2") to fire every 2 minutes,
-# screenshot the terminal, then change back before pushing to GitHub.
 scheduler.add_job(
     func=run_pipeline,
     trigger=CronTrigger(day=1, hour=6, minute=0),
     id="monthly_regulatory_report",
     name="Monthly Regulatory Report",
-    misfire_grace_time=3600,  # 1-hour grace if the server was down
+    # 1-hour grace window in case the host was down at 06:00.
+    misfire_grace_time=3600,
 )
 
 
 if __name__ == "__main__":
-    print("Scheduler running - pipeline fires on the 1st of each month at 06:00")
+    print("Scheduler running. Pipeline fires on the 1st of each month at 06:00.")
     print("Ctrl+C to stop.")
     try:
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
-        print("Scheduler stopped cleanly.")
+        print("Scheduler stopped.")

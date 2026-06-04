@@ -1,6 +1,9 @@
--- Regulatory Report: Default Rate Summary by Loan Type
--- Mirrors RBI NPA classification reporting format.
--- "Defaulted" = Charged Off, Default, or Late (31-120 days).
+-- Default rate by loan tenor. Inspired by the NPA cuts in RBI
+-- regulatory reports (e.g. Form A in DSB returns).
+--
+-- "Defaulted" here = Charged Off OR Default OR Late (31-120 days).
+-- Pure-RBI NPA is 90+ DPD; the LC late bucket overlaps so it's a
+-- reasonable proxy on public data.
 
 WITH portfolio_base AS (
     SELECT

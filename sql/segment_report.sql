@@ -1,8 +1,11 @@
--- Customer Risk Segmentation using Lending Club grade.
--- grade A-G is analogous to CIBIL bureau bands used in Indian banking:
---   A,B  -> Low Risk   (prime borrowers)
---   C,D  -> Medium Risk
---   E,F,G-> High Risk  (subprime)
+-- Risk-band segmentation using LC grades.
+-- LC grade is loosely analogous to CIBIL bureau bands:
+--   A, B    -> prime              (Low Risk)
+--   C, D    -> near-prime         (Medium Risk)
+--   E, F, G -> subprime           (High Risk)
+--
+-- TODO: revisit the cutoffs once we have a longer history. F+G are
+-- thin in 2018 Q4, might want to merge with E for stability.
 
 SELECT
     CASE
