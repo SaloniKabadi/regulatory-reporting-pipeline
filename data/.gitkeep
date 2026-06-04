@@ -1,3 +1,2 @@
-# Place LoanStats_2018Q4.csv here.
+# Drop LoanStats_2018Q4.csv here.
 # Source: https://www.kaggle.com/datasets/wordsforthewise/lending-club
-# The CSV itself is gitignored (~99 MB), only this placeholder is tracked.
