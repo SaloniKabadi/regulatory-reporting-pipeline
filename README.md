@@ -157,6 +157,3 @@ python pipeline/scheduler.py
 - The "NPA" framing maps roughly onto LC's late-payment buckets but
   isn't a strict RBI definition. On real bank data you'd derive NPA
   straight from days-past-due.
-- The dashboard is Plotly on GitHub Pages, not Power BI. Same idea,
-  different tooling. I went this route so the dashboard is reachable
-  by anyone with a browser, no Microsoft licence required.
