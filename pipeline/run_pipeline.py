@@ -6,6 +6,7 @@ Same pattern banks use for month-end regulatory reporting.
 
 import logging
 import os
+import shutil
 import sys
 from datetime import datetime
 
@@ -107,11 +108,16 @@ def main():
         ),
     }
 
-    # 3. Export
+    # 3. Export — write a timestamped copy for archival, plus a stable
+    # `_latest.xlsx` so Power BI / dashboards can point at one fixed path.
     fname = os.path.join(
         OUTPUT_DIR, f"monthly_report_{datetime.now():%Y%m}.xlsx"
     )
     export_to_excel(reports, fname)
+
+    latest = os.path.join(OUTPUT_DIR, "monthly_report_latest.xlsx")
+    shutil.copyfile(fname, latest)
+    log.info(f"Latest pointer updated: {latest}")
 
     log.info("======= PIPELINE COMPLETE =======")
 

@@ -80,7 +80,11 @@ python pipeline/scheduler.py
 
 ## Sample output
 
-After running, `output/monthly_report_YYYYMM.xlsx` contains three sheets:
+After running, `output/` contains two files:
+- `monthly_report_YYYYMM.xlsx` — timestamped archival copy
+- `monthly_report_latest.xlsx` — stable copy that Power BI points at
+
+Each file has three sheets:
 
 **Risk_Summary** — default rate and NPA exposure by loan tenor
 
