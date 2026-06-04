@@ -1,8 +1,11 @@
 APScheduler==3.11.2
 et_xmlfile==2.0.0
+narwhals==2.21.0
 numpy==2.0.2
 openpyxl==3.1.5
+packaging==26.2
 pandas==2.3.3
+plotly==6.8.0
 python-dateutil==2.9.0.post0
 pytz==2026.2
 six==1.17.0

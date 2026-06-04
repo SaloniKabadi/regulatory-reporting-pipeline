@@ -3,14 +3,16 @@
 End-to-end ETL pipeline simulating a bank's month-end risk reporting cycle on
 **128,412 real loan records** from Lending Club (2018 Q4).
 
-**Stack:** Python · SQL · SQLite · SQLAlchemy · pandas · APScheduler · XlsxWriter · Power BI
+**Stack:** Python · SQL · SQLite · SQLAlchemy · pandas · APScheduler · XlsxWriter · Plotly
 
 ## Architecture
 
 ```
    INGEST            TRANSFORM          AUTOMATE         EXPORT           DASHBOARD
-CSV → SQLite   ->   SQL queries   ->   Python script  -> Excel report ->  Power BI
+CSV → SQLite   ->   SQL queries   ->   Python script  -> Excel report ->  Plotly HTML
 ```
+
+**Live dashboard:** [saloniKabadi.github.io/regulatory-reporting-pipeline](https://salonikabadi.github.io/regulatory-reporting-pipeline/)
 
 ## What this project demonstrates
 
@@ -19,7 +21,7 @@ CSV → SQLite   ->   SQL queries   ->   Python script  -> Excel report ->  Powe
 - **Python orchestration** — single `run_pipeline.py` runs ingest -> SQL -> Excel
 - **Scheduling** — APScheduler cron job for monthly auto-runs
 - **Reporting** — formatted multi-sheet Excel (navy headers, frozen panes, number formats)
-- **Dashboard** — Power BI consuming the Excel output
+- **Dashboard** — interactive Plotly HTML dashboard published via GitHub Pages
 
 ## Dataset
 
@@ -44,11 +46,13 @@ regulatory-reporting-pipeline/
 ├── pipeline/
 │   ├── ingest.py                      # CSV -> SQLite
 │   ├── run_pipeline.py                # main orchestrator
+│   ├── build_dashboard.py             # SQLite -> docs/index.html
 │   └── scheduler.py                   # APScheduler cron
 ├── output/
 │   └── monthly_report_YYYYMM.xlsx     # auto-generated, gitignored
-├── powerbi/
-│   └── dashboard.pbix
+├── docs/
+│   └── index.html                     # interactive dashboard (GitHub Pages)
+├── powerbi/                           # optional .pbix lives here
 ├── assets/                            # screenshots for this README
 ├── .gitignore
 ├── README.md
@@ -74,7 +78,11 @@ pip install -r requirements.txt
 # 4. Run the pipeline
 python pipeline/run_pipeline.py
 
-# 5. (Optional) Run the scheduler
+# 5. Build the dashboard
+python pipeline/build_dashboard.py
+open docs/index.html
+
+# 6. (Optional) Run the scheduler
 python pipeline/scheduler.py
 ```
 
@@ -112,16 +120,17 @@ on bureau-score-derived bands.
 - [x] 02 · SQL Layer
 - [x] 03 · Python Pipeline
 - [x] 04 · Automation (scheduler ready)
-- [ ] 05 · Power BI dashboard
-- [ ] 06 · GitHub & README polish
+- [x] 05 · Interactive dashboard (Plotly + GitHub Pages)
+- [x] 06 · GitHub & README polish
 
 ## Resume bullet
 
-> Built an end-to-end automated regulatory reporting pipeline using Python, SQL,
-> and Power BI — covering data ingestion into SQLite, SQL-based NPA and risk-segment
-> transformation, APScheduler-based monthly automation, and stakeholder-ready
-> formatted Excel + dashboard output on **128k+ Lending Club loan records**.
+> Built an end-to-end automated regulatory reporting pipeline using Python and SQL —
+> covering data ingestion into SQLite, SQL-based NPA and risk-segment transformation,
+> APScheduler-based monthly automation, formatted Excel deliverables, and an
+> interactive Plotly dashboard published via GitHub Pages on **128k+ Lending Club
+> loan records**.
 
 ## Resume keywords
 
-ETL · Automation · DAX · SQL · Python · Power BI · Regulatory Reporting · NPA · Risk Segmentation
+ETL · Automation · SQL · Python · Plotly · Regulatory Reporting · NPA · Risk Segmentation
